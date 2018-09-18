@@ -26,8 +26,11 @@ they mean exactly? And more importantly, how do we use them for our work?
 
 The *cloud* is a generic term commonly used to refer to remote computing resources of any kind --
 that is, any computers that you use but are not right in front of you. Cloud can refer to
-webservers, remote storage, API endpoints, as well as more traditional "compute" resources. A
-*cluster* on the other hand, is a term used to describe a network of computers. The computers in a
+webservers, remote storage, API endpoints, as well as more traditional "compute" resources. It might refer
+to **public cloud** resources from providers such as Amazon Web Services, Microsoft Azure or Google Cloud or
+to **private cloud** resources in yourown University.
+
+A *cluster* on the other hand, is a term used to describe a network of computers. The computers in a
 cluster typically share a common purpose, and are used to accomplish tasks that might otherwise be
 too big for any one computer.
 
@@ -35,10 +38,11 @@ too big for any one computer.
 
 ## Where are we?
 
-Very often, many users are tempted to think of a high-performance computing installation as one
-giant, magical machine. Sometimes, people will assume that the computer they've logged onto is the
-entire computing cluster. So what's really happening? What computer have we logged on to? The name
-of the current computer we are logged onto can be checked with the `hostname` command. (Clever users
+Very often, users are tempted to think of a HPC cluster  as one giant, magical machine. Sometimes, 
+people will assume that the computer they've logged onto is the entire computing cluster. 
+
+So what's really happening? What part of the HPC cluster have we logged on to? The name
+of the current computer we are logged onto can be checked with the `hostname` command. (Some users
 will notice that the current hostname is also part of our prompt!)
 
 ```
@@ -46,55 +50,62 @@ will notice that the current hostname is also part of our prompt!)
 ```
 {: .bash}
 ```
-gra-login3
+login2.arc3.leeds.ac.uk
 ```
 {: .output}
 
 Individual computers that compose a cluster are typically called *nodes* (although you will also
 hear people call them *servers*, *computers* and *machines*). On a cluster, there are different
-types of nodes for different types of tasks. The node where you are right now is called the *head
-node*, *login node* or *submit node*. A login node serves as an access point to the cluster. As a
-gateway, it is well suited for uploading and downloading files, setting up software, and running
-quick tests. It should never be used for doing actual work.
+types of nodes for different types of tasks. 
 
-The real work on a cluster gets done by the *worker* (or *execute*) *nodes*. Worker nodes come in
+The node where you are right now is called a *login node*. A login node serves as an access point to the cluster.
+Here at Leeds, each of or HPC clusters has two login nodes; sometimes you connect to login node 1 (`login1`) and
+sometimes you connect to login node 2 (`login2`). We do this to balance load between the two login nodes when there
+are a large number of users. 
+
+As a *gateway*, login nodes are well suited for uploading and downloading files, setting up software, and running
+quick tests. They should never be used for doing actual work.
+
+The real work on a cluster gets done by the *compute nodes*. Compute nodes come in
 many shapes and sizes, but generally are dedicated to doing all of the heavy lifting that needs
 doing.
 
-All interaction with the worker nodes is handled by a specialised piece of software called a
-scheduler (the scheduler used in this lesson is called SLURM). We'll learn more about how to use the
+All interaction with the compute nodes is handled by a specialised piece of software called a
+scheduler (the scheduler used in this lesson is called Gridengine). We'll learn more about how to use the
 scheduler to submit jobs next, but for now, it can also tell us more information about the worker
 nodes.
 
-For example, we can view all of the worker nodes with the `sinfo` command.
+For example, we can view all of the compute nodes with the `qhost` command.
 
 ```
-[remote]$ sinfo
+[remote]$ qhost
 ```
 {: .bash}
 ```
-PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
-compute*     up 7-00:00:00      1 drain* gra259
-compute*     up 7-00:00:00     11  down* gra[8,99,211,268,376,635,647,803,852,966,986]
-compute*     up 7-00:00:00      1   drng gra272
-compute*     up 7-00:00:00     31   comp gra[988-991,994-1002,1006-1007,1015,1017,1021-1022,1028-...
-compute*     up 7-00:00:00     33  drain gra[225-251,253-256,677,1026]
-compute*     up 7-00:00:00    323    mix gra[7,13,25,41,43-44,56,58-77,107-108,112-113,117,125-12...
-compute*     up 7-00:00:00    464  alloc gra[1-6,9-12,14-19,21-24,26-40,42,45-55,57,100-106,109-1...
-compute*     up 7-00:00:00    176   idle gra[78-98,123-124,128-162,170-172,285-299,429-447,449-45...
-compute*     up 7-00:00:00      3   down gra[20,801,937]
+HOSTNAME                ARCH         NCPU NSOC NCOR NTHR  LOAD  MEMTOT  MEMUSE  SWAPTO  SWAPUS
+----------------------------------------------------------------------------------------------
+global                  -               -    -    -    -     -       -       -       -       -
+db12gpu1                lx-amd64       24    2   24   24  0.01  125.6G    2.0G   32.0G     0.0
+db12gpu10               lx-amd64       24    2   24   24  9.71  251.6G    9.5G   32.0G     0.0
+db12gpu11               lx-amd64       24    2   24   24  8.21  251.6G   12.9G   32.0G     0.0
+db12gpu12               lx-amd64       24    2   24   24  0.01  251.6G    2.8G   32.0G     0.0
+db12gpu13               lx-amd64       24    2   24   24  0.01  503.6G    3.7G   32.0G     0.0
+db12gpu2                lx-amd64       24    2   24   24  0.01  125.6G    1.7G   32.0G     0.0
+db12gpu3                lx-amd64       24    2   24   24  5.10  251.6G  151.2G   32.0G   81.8M
 ```
 {: .output}
 
 There are also specialised machines used for managing disk storage, user authentication, and other
-infrastructure-related tasks. Although we do not typically logon to or interact with these machines
+infrastructure-related tasks. On most HPC clusters these are called *head nodes*.
+
+Although we do not typically logon to or interact with these machines
 directly, they enable a number of key features like ensuring our user account and files are
 available throughout the cluster. This is an important point to remember: files saved on one node
 (computer) are available everywhere on the cluster!
 
 ## What's in a node? 
 
-All of a cluster's nodes have the same components as your own laptop or desktop: *CPUs* (sometimes
+All of a cluster's nodes have similar components as your own laptop or desktop: *CPUs* (sometimes
 also called *processors* or *cores*), *memory* (or *RAM*), and *disk* space. CPUs are a computer's
 tool for actually running programs and calculations. Information about a current task is stored in
 the computer's memory. Disk is a computer's long-term storage for information it will need later.
@@ -104,7 +115,7 @@ the computer's memory. Disk is a computer's long-term storage for information it
 > Try to find out the number of CPUs and amount of memory available on your personal computer.
 {: .challenge}
 
-> ## Explore The Head Node
+> ## Explore the login node
 >
 > Now we'll compare the size of your computer with the size of the head node: To see the number of
 > processors, run:
@@ -138,7 +149,7 @@ the computer's memory. Disk is a computer's long-term storage for information it
 > {: .bash}
 {: .challenge}
 
-> ## Explore a Worker Node
+> ## Explore a compute node
 > 
 > Finally, let's look at the resources available on the worker nodes where your jobs will actually
 > run. Try running this command to see the name, CPUs and memory available on the worker nodes:

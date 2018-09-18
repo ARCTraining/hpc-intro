@@ -1,5 +1,5 @@
 ---
-title: "Why Use a Cluster?"
+title: "Why Use a HPC Cluster?"
 teaching: 15
 exercises: 5
 questions:
@@ -22,7 +22,7 @@ keypoints:
 > ## What do you need?
 >
 > Talk to your neighbor about your research. How does computing help you do your research? How could
-> more computing help you do more or better research?
+> more computing power help you do more or better research?
 {: .challenge}
 
 Frequently, research problems that use computing can outgrow the desktop or laptop computer where
@@ -39,7 +39,12 @@ they started:
   haven't used this option on their desktop, but in going from 2D to 3D simulations, simulation time
   has more than tripled and it might be useful to take advantage of that feature.
 
-In all these cases, what is needed is access to more computers than can be used at the same time.
+* A geographer is running a matlab model that needs lots of computer memory. With a limited amount of memory
+  on their laptop there is a maximum simulation size they can run.
+
+In all these cases, what is needed is access to more computers with more resource (computer cores and memory) 
+that can be used at the same time.
+
 Luckily, large scale computing systems -- shared computing resources with lots of computers -- are
 available at many universities, labs, or through national networks. These resources usually have
 more central processing units (CPUs), CPUs that operate at higher speeds, more memory, more storage,
@@ -58,7 +63,8 @@ Using a cluster often has the following advantages for researchers:
   most cases when the pool is large and diverse enough the resources on the system are used almost
   constantly.
 * **Cost.** Bulk purchasing and government funding mean that the cost to the research community for
-  using these systems is significantly less than it would be otherwise.
+  using these systems is significantly less than it would be otherwise. In some Universities HPC is free 
+  at the point of use for researchers.
 * **Convenience.** Maybe your calculations just take a long time to run or are otherwise
   inconvenient to run on your personal computer. There's no need to tie up your own computer for
   hours when you can use someone else's instead.
@@ -73,15 +79,29 @@ the start of the lesson.
 > differences/difficulties you imagine you may run into.
 {: .challenge}
 
-## On Command Line
+## Using the Command Line
 
-Using HPC systems often involves the use of a shell through a command line interface (CLI) and
-either specialized software or programming techniques. The shell is a program with the special role
-of having the job of running other programs rather than doing calculations or similar tasks itself.
+Using HPC systems often involves the use of a Linux shell through a command line interface (CLI) and
+either specialised software or programming techniques. 
+
+Many researchers only have experience of using Windows and although learning to use the shell may take a 
+short while, it will be time well spent.
+
+The shell is a program with the special role of having the job of running other programs rather than 
+doing calculations or similar tasks itself.
+
 What the user types goes into the shell, which then figures out what commands to run and orders the
 computer to execute them. (Note that the shell is called "the shell" because it encloses the
-operating system in order to hide some of its complexity and make it simpler to interact with.) The
-most popular Unix shell is Bash, the Bourne Again SHell (so-called because it's derived from a shell
+operating system in order to hide some of its complexity and make it simpler to interact with.) 
+
+Think of it this way:
+* The user communicates with the shell
+* The shell works out what commands to run and communicates with the computer's operating system
+* The operating systems communicates with, controls and manages the computer's hardware.
+
+[Diagram]
+
+The most popular Unix and Linux shell is Bash, the Bourne Again SHell (so-called because it's derived from a shell
 written by Stephen Bourne). Bash is the default shell on most modern implementations of Unix and in
 most packages that provide Unix-like tools for Windows.
 
@@ -90,11 +110,15 @@ earliest days of computers, the only way to interact with early computers was to
 the 1950s to the 1980s most people used line printers. These devices only allowed input and output
 of the letters, numbers, and punctuation found on a standard keyboard, so programming languages and
 software interfaces had to be designed around that constraint and text-based interfaces were the way
-to do this. Typing-based interfaces are often called a **command-line interface**, or CLI, to
+to do this. 
+
+Typing-based interfaces are often called a **command-line interface**, or CLI, to
 distinguish it from a **graphical user interface**, or GUI, which most people now use. The heart of
 a CLI is a **read-evaluate-print loop**, or REPL: when the user types a command and then presses the
 Enter (or Return) key, the computer reads it, executes it, and prints its output. The user then
 types another command, and so on until the user logs off.
+
+[Diagram]
 
 Learning to use Bash or any other shell sometimes feels more like programming than like using a
 mouse. Commands are terse (often only a couple of characters long), their names are frequently
