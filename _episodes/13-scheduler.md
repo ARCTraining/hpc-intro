@@ -21,17 +21,8 @@ and when? How do we ensure that a task is run with the resources it needs? This 
 special piece of software called the scheduler. On an HPC system, the scheduler manages which jobs
 run where and when.
 
-> ## Job scheduling roleplay (optional)
-> 
-> Your instructor will divide you into groups taking on different roles in the cluster (users,
-> compute nodes and the scheduler). Follow their instructions as they lead you through this
-> exercise. You will be emulating how a job scheduling system works on the cluster.
-> 
-> [*notes for the instructor here*](../guide)
-{: .challenge}
 
-The scheduler used in this lesson is SLURM. Although SLURM is not used everywhere, running jobs is
-quite similar regardless of what software is being used. The exact syntax might change, but the
+The scheduler used on our HPC systems at Leeds is **Gridengine**. Although Gridengine is not used everywhere, running jobs is quite similar regardless of what software is being used. The exact syntax might change, but the
 concepts remain the same.
 
 ## Running a batch job
@@ -40,17 +31,21 @@ The most basic use of the scheduler is to run a command non-interactively. Any c
 commands) that you want to run on the cluster is called a *job*, and the process of using a
 scheduler to run the job is called *batch job submission*.
 
-In this case, the job we want to run is just a shell script. Let's create a demo shell script to run
+In this case, the job we want to run is just a shell script to do a simple task. Let's create a demo shell script to run
 as a test.
 
 > ## Creating our test job
 > 
-> Using your favourite text editor, create the following script and run it. Does it run on the
-> cluster or just our login node?
+> Using your favourite text editor (mine is `nano`), create the following script and run it. Does it run on the
+> cluster or just our login node? 
+> 
+> * How do we know?
+> * What does it do?
 >
 >```
 >#!/bin/bash
->
+> 
+> #$ -l h_rt=00:05:00
 > echo 'This script is running on:'
 > hostname
 > sleep 120
@@ -58,12 +53,12 @@ as a test.
 > {: .bash}
 {: .challenge}
 
-If you completed the previous challenge successfully, you probably realise that there is a
+If you completed the previous exercise successfully, you probably realise that there is a
 distinction between running the job through the scheduler and just "running it". To submit this job
-to the scheduler, we use the `sbatch` command.
+to the scheduler, we use the `qsub` command.
 
 ```
-[remote]$ sbatch example-job.sh
+[remote]$ qsub example-job.sh
 ```
 {: .bash}
 ```
@@ -76,7 +71,7 @@ tries to run the job for us. While the job is waiting to run, it goes into a lis
 *queue*. To check on our job's status, we check the queue using the command `squeue`.
 
 ```
-[remote]$ squeue -u yourUsername
+[remote]$ qstat -u yourUsername
 ```
 {: .bash}
 ```
@@ -85,15 +80,15 @@ JOBID USER         ACCOUNT     NAME           ST REASON START_TIME         TIME 
 ```
 {: .output}
 
-We can see all the details of our job, most importantly that it is in the "R" or "RUNNING" state.
-Sometimes our jobs might need to wait in a queue ("PENDING") or have an error. The best way to check
-our job's status is with `squeue`. Of course, running `squeue` repeatedly to check on things can be
+We can see all the details of our job, most importantly that it is in the "r" or "RUNNING" state.
+Sometimes our jobs might need to wait in a queue ("PENDING", shown as "qw") or have an error. The best way to check
+our job's status is with `qstat`. Of course, running `qstat` repeatedly to check on things can be
 a little tiresome. To see a real-time view of our jobs, we can use the `watch` command. `watch`
 reruns a given command at 2-second intervals. Let's try using it to monitor another job.
 
 ```
 [remote]$ sbatch example-job.sh
-[remote]$ watch squeue -u yourUsername
+[remote]$ watch qstat
 ```
 {: .bash}
 
@@ -102,26 +97,32 @@ from the queue. Press `Ctrl-C` when you want to stop the `watch` command.
 
 ## Customising a job
 
-The job we just ran used all of the scheduler's default options. In a real-world scenario, that's
+The job we just ran used all of the scheduler's default options. For our schedulers it means 1 CPU core and
+1 GB memory. We also asked for 5 minutes of runtime (or in HPC-speak **wallclock** time) in the line:
+
+`#$ -l h_rt=00:05:00`
+
+In a real-world scenario, that's
 probably not what we want. The default options represent a reasonable minimum. Chances are, we will
 need more cores, more memory, more time, among other special considerations. To get access to these
 resources we must customise our job script.
 
 Comments in UNIX (denoted by `#`) are typically ignored. But there are exceptions. For instance the
 special `#!` comment at the beginning of scripts specifies what program should be used to run it
-(typically `/bin/bash`). Schedulers like SLURM also have a special comment used to denote special
-scheduler-specific options. Though these comments differ from scheduler to scheduler, SLURM's
-special comment is `#SBATCH`. Anything following the `#SBATCH` comment is interpreted as an
+(typically `/bin/bash`). Schedulers like Gridengine also have a special comment (or PRAGMA) used to denote special
+scheduler-specific options. Though these comments differ from scheduler to scheduler, Gridengine's
+special comment is `#$`. Anything following the `#$` comment is interpreted as an
 instruction to the scheduler.
 
-Let's illustrate this by example. By default, a job's name is the name of the script, but the `-J`
+Let's illustrate this by example. By default, a job's name is the name of the script, but the `-N`
 option can be used to change the name of a job.
 
-Submit the following job (`sbatch example-job.sh`):
+Submit the following job (`qsub example-job.sh`):
 
 ```
 #!/bin/bash
-#SBATCH -J new_name
+#$ -N new_name
+#$ -l h_rt=00:05:00
 
 echo 'This script is running on:'
 hostname
@@ -129,7 +130,7 @@ sleep 120
 ```
 
 ```
-[remote]$ squeue -u yourUsername
+[remote]$ qsub -u yourUsername
 ```
 {: .bash}
 ```
@@ -142,29 +143,33 @@ Fantastic, we've successfully changed the name of our job!
 
 > ## Setting up email notifications
 > 
-> Jobs on an HPC system might run for days or even weeks. We probably have better things to do than
-> constantly check on the status of our job with `squeue`. Looking at the
-> [online documentation for `sbatch`](https://slurm.schedmd.com/sbatch.html) (you can also google
-> "sbatch slurm"), can you set up our test job to send you an email when it finishes?
+> Jobs on an HPC system might run for days or even weeks (although individual tasks on our HPC clusters are
+> limited to a maximum **48 hours** wallclock time). 
 > 
-> Hint: you will need to use the `--mail-user` and `--mail-type` options.
+> As we probably have better things to do than constantly check on the status of our job with `qstat`. 
+>
+> Take a look at the [online documentation for `qsub`](https://slurm.schedmd.com/sbatch.html) (you can also google
+> "qsub Gridengine options"), can you set up our test job to send you an email when it finishes?
+> 
+> Hint: you will need to use the `-M` and `-m` options.
 {: .challenge}
 
 ### Resource requests
 
-But what about more important changes, such as the number of CPUs and memory for our jobs? One thing
+But what about more important changes, such as the number of CPU cores and memory for our jobs? One thing
 that is absolutely critical when working on an HPC system is specifying the resources required to
-run a job. This allows the scheduler to find the right time and place to schedule our job. If you do
-not specify requirements (such as the amount of time you need), you will likely be stuck with your
-site's default resources, which is probably not what we want.
+run a job. This allows the scheduler to find the right time and place to schedule our job. 
+
+If you donot specify requirements (such as the amount of time you need), you will likely be stuck with the 
+default resources, which is probably not what we want.
 
 The following are several key resource requests:
 
-* `-n <nnodes>` - how many nodes does your job need? 
+* `-l nodes=<nnodes>` - how many nodes does your job need? 
 
-* `-c <ncpus>` - How many CPUs does your job need?
+* `-l np=<ncpus>` - How many CPUs does your job need?
 
-* `--mem=<megabytes>` - How much memory on a node does your job need in megabytes? You can also
+* `-l <megabytes>` - How much memory on a node does your job need in megabytes? You can also
   specify gigabytes using by adding a little "g" afterwards (example: `--mem=5g`)
 
 * `--time <days-hours:minutes:seconds>` - How much real-world time (walltime) will your job take to
@@ -256,10 +261,10 @@ JOBID  USER  ACCOUNT  NAME  ST  REASON  START_TIME  TIME  TIME_LEFT  NODES  CPUS
 
 > ## Cancelling multiple jobs
 >
-> We can also all of our jobs at once using the `-u` option. This will delete all jobs for a
+> We can also delete all of our jobs at once using the `-u` option. This will delete all jobs for a
 > specific user (in this case us). Note that you can only delete your own jobs.
 >
-> Try submitting multiple jobs and then cancelling them all with `scancel -u yourUsername`.
+> Try submitting multiple jobs and then cancelling them all with `qdel -u yourUsername`.
 {: .challenge}
 
 ## Other types of jobs

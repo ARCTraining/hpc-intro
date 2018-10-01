@@ -21,7 +21,7 @@ keypoints:
 
 > ## What do you need?
 >
-> Talk to your neighbor about your research. How does computing help you do your research? How could
+> Talk to your neighbour about your research. How does computing help you do your research? How could
 > more computing power help you do more or better research?
 {: .challenge}
 
@@ -46,9 +46,11 @@ In all these cases, what is needed is access to more computers with more resourc
 that can be used at the same time.
 
 Luckily, large scale computing systems -- shared computing resources with lots of computers -- are
-available at many universities, labs, or through national networks. These resources usually have
-more central processing units (CPUs), CPUs that operate at higher speeds, more memory, more storage,
-and faster connections with other computer systems. They are frequently called "clusters",
+available at many universities, labs, or through national networks. Leeds has particularly good University-level 
+resources (we call these **Tier 3** resources; regional resources are **Tier 2**, national resources **Tier 1** and 
+supra-national resources **Tier 0**)
+
+These resources usually have more central processing units (CPUs), CPUs that operate at higher speeds, more memory, more storage, and faster connections with other computer systems. They are frequently called "clusters",
 "supercomputers" or resources for "high performance computing" or HPC. In this lesson, we will
 usually use the terminology of HPC and HPC cluster.
 
